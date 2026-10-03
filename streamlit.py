@@ -113,14 +113,16 @@
 # //////////////////////////////
 
 
+# 
+
 import os
 import streamlit as st
-from google import genai
+from groq import Groq
 
 
-# Gemini client
-client = genai.Client(
-    api_key=os.environ["GEMINI_API_KEY"]
+# Groq client
+client = Groq(
+    api_key=os.environ["GROQ_API_KEY"]
 )
 
 
@@ -158,12 +160,19 @@ if submit and user_input:
         + "\nAI:"
     )
 
-    response = client.models.generate_content(
-        model="gemini-3.8-flash",
-        contents=prompt
+    response = client.chat.completions.create(
+        model="openai/gpt-oss-120b",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        temperature=0.7,
+        max_tokens=300
     )
 
-    ai_reply = response.text.strip()
+    ai_reply = response.choices[0].message.content.strip()
 
     st.session_state.memory.append(
         f"AI: {ai_reply}"
@@ -181,3 +190,7 @@ for msg in st.session_state.memory:
         st.markdown(
             f"**🤱 Mom Friend:** {msg[4:]}"
         )
+
+
+
+
